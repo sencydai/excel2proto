@@ -212,7 +212,7 @@ func printStruct(sd *StructData) []string {
 			output("binary.Read(reader, binary.LittleEndian, &p.%s[i])", fieldName)
 			output("}")
 		case "string":
-			output("p.%s = decodestring(reader)", fieldName)
+			output("p.%s = coder.Decodestring(reader)", fieldName)
 		case "[]string":
 			if !defCount {
 				defCount = true
@@ -221,7 +221,7 @@ func printStruct(sd *StructData) []string {
 			output("binary.Read(reader, binary.LittleEndian, &count)")
 			output("p.%s = make([]string,count)", fieldName)
 			output("for i := int16(0); i < count; i++ {")
-			output("p.%s[i] = decodestring(reader)", fieldName)
+			output("p.%s[i] = coder.Decodestring(reader)", fieldName)
 			output("}")
 		default:
 			if !defCount {
@@ -305,7 +305,10 @@ func handle() {
 	}
 
 	data := []string{"package " + packName, "import (", "\"bytes\"", "\"encoding/binary\"", "\"github.com/sencydai/excel2proto/coder\"", ")"}
-	data = append(data, []string{"var (", "decodestring = coder.Decodestring", ")"}...)
+	data = append(data, "var (")
+	data = append(data, "_ = binary.LittleEndian")
+	data = append(data, "_ = coder.Decodestring")
+	data = append(data, ")")
 
 	for _, v := range structDatas {
 		data = append(data, printStruct(v)...)
